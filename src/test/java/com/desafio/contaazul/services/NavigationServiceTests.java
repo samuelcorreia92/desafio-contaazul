@@ -117,4 +117,12 @@ public class NavigationServiceTests {
 		service.addRobotToZone("Robot 2", 0, 0, Direction.SOUTH, zone2);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void failOnOneRobotCrashIntoAnother() {
+		Zone zone = service.createZone("Zone", 5, 5);
+		Robot robot1 = service.addRobotToZone("Robot 1", 0, 0, Direction.NORTH, zone);
+		service.addRobotToZone("Robot 2", 1, 1, Direction.SOUTH, zone);
+		service.moveRobot(robot1, "MMRMRMMRML");
+	}
+
 }

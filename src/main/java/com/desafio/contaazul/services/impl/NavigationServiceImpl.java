@@ -17,10 +17,10 @@ public class NavigationServiceImpl implements NavigationService {
 	private List<Zone> zones = new ArrayList<>();
 
 	public Zone createZone(String zoneName, int width, int height) {
-		if(width <= 0 || height <= 0) {
+		if (width <= 0 || height <= 0) {
 			throw new IllegalArgumentException("Zone width and height must be greater than zero");
 		}
-		
+
 		Zone zone = ZoneImpl.create(zoneName, width, height);
 		zones.add(zone);
 		return zone;
@@ -55,11 +55,31 @@ public class NavigationServiceImpl implements NavigationService {
 	}
 
 	private void validateRobotPosition(Robot robot) {
+		validateIfRobotIsOutsideZone(robot);
+		validateIfRobotCrashedIntoAnother(robot);
+	}
+
+	private void validateIfRobotIsOutsideZone(Robot robot) {
 		Zone zone = robot.getZone();
 
 		if (robot.getPositionX() < 0 || robot.getPositionY() < 0 || robot.getPositionX() >= zone.getWidth()
 				|| robot.getPositionY() >= zone.getHeight()) {
-			throw new IllegalStateException(String.format("The robot %s is outside the zone area", robot.getName()));
+			throw new IllegalStateException(
+					String.format("The robot %s is outside the zone area (%s)", robot.getName(), zone.getName()));
+		}
+	}
+
+	private void validateIfRobotCrashedIntoAnother(Robot robot) {
+		List<Robot> robots = ((ZoneImpl) robot.getZone()).getRobots();
+
+		for (Robot robotToValidade : robots) {
+			if (robotToValidade != robot) {
+				if (robotToValidade.getPositionX() == robot.getPositionX()
+						&& robotToValidade.getPositionY() == robot.getPositionY()) {
+					throw new IllegalStateException(String.format("The robot %s crashed into robot %s in zone (%s)",
+							robot.getName(), robotToValidade.getName(), robot.getZone().getName()));
+				}
+			}
 		}
 	}
 
